@@ -1,6 +1,6 @@
 # django-npm
 
-Want to use npm modules in your django project without vendoring them? django-pm serves as a wrapper around the npm command-line program as well as a staticfiles finder.
+Want to use npm modules in your django project without vendoring them? django-npm serves as a wrapper around the npm command-line program as well as a staticfiles finder.
 
 ## Installation
 
