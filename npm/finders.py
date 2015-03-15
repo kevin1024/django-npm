@@ -2,11 +2,15 @@ import tempfile
 import shutil
 import os
 import subprocess
-import collections
 from fnmatch import fnmatch
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
+
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 
 def get_files(npm_executable_path=None, npm_prefix_path=None):
     command = ['npm' or npm_executable_path, 'install']
@@ -39,7 +43,7 @@ class NpmFinder(FileSystemFinder):
         self.locations = [
             (destination, files),
         ]
-        self.storages = collections.OrderedDict()
+        self.storages = OrderedDict()
 
         filesystem_storage = FileSystemStorage(location=self.locations[0][1])
         filesystem_storage.prefix = self.locations[0][0]

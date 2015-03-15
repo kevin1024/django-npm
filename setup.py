@@ -4,6 +4,12 @@ from os import path
 
 here = path.abspath(path.dirname(__file__))
 
+try:
+    from collections import OrderedDict
+    requirements = []
+except ImportError:
+    requirements = ['ordereddict']
+
 setup(
     name='django-npm',
     version='0.1.0',
@@ -28,6 +34,7 @@ setup(
 
     keywords='django npm staticfiles',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    install_requires=requirements,
     extras_require = {
         'test': ['pytest'],
     },
