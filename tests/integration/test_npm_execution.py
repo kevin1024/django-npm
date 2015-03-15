@@ -9,5 +9,5 @@ def test_get_files(tmpdir):
     "name": "test",
     "dependencies": {"mocha": "*"}
     }''')
-    get_files(str(pjson), None)
+    get_files(npm_prefix_path=str(tmpdir))
 

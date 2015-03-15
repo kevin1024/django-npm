@@ -5,11 +5,11 @@ from django.test.utils import override_settings
 from npm.finders import NpmFinder
 
 def test_finder(tmpdir):
-    pjson = tmpdir.join('package.json')
-    pjson.write('''{
+    pjson = tmpdir.join('package.json') \
+    .write('''{
     "name": "test",
     "dependencies": {"mocha": "*"}
     }''')
-    with override_settings(NPM_PACKAGE_JSON_PATH=str(pjson)):
+    with override_settings(NPM_PREFIX_PATH=str(tmpdir)):
         f = NpmFinder()
         print list(f.list([]))

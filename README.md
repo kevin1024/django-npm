@@ -16,10 +16,9 @@ Want to use npm modules in your django project without vendoring them? django-np
 
 Note: all paths must be *absolute* paths.
 
- * `NPM_PACKAGE_JSON_PATH`: path to your project's `package.json`
+ * `NPM_PREFIX_PATH`: Path to the npm "prefix' directory - this is where npm will look for your `package.json`, put your `node_modules` folder and look for a `.npmrc` file
  * `NPM_EXECUTABLE_PATH`: (optional) defaults to wherever `npm` is on your PATH.  If you specify this, you can override the path to the `npm` executable.
- * `NPM_CONFIG_FILE_PATH`: (optional) defaults to None. If you have a special npm config file (`.npmrc`) that you need for your project, specify the path here and it will be used with npm to install your dependencies.
- * `NPM_NODE_MODULES_PATH`: (optional) defaults to a temporary directory. The path to `npm install` the files into.  You really only need to set this if you are worried about the time taken to `npm install` or if you call collectstatic with the `--link` option
+ * `NPM_DESTINATION_PATH`: (optional) Your npm files will end up under this directory.  I usually use something like 'js/lib' but you can leave it blank and they will just end up in the root.
 
 ## Usage
 

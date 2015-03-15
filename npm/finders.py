@@ -7,33 +7,27 @@ from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 
-def get_files(package_json_path, npm_executable_path, npm_config_file_path=None, npm_node_modules_path=None):
-    dir_path = tempfile.mkdtemp()
-    if npm_node_modules_path:
-        if not os.path.exists(npm_node_modules_path):
-            os.mkdir(npm_node_modules_path)
-        os.symlink(npm_node_modules_path, os.path.join(dir_path, 'node_modules'))
-    shutil.copy(package_json_path, dir_path)
-    shutil.copy(npm_config_file_path, dir_path)
+def get_files(npm_executable_path=None, npm_prefix_path=None):
+    command = ['npm' or npm_executable_path, 'install']
+    if npm_prefix_path:
+        command.append('--prefix=' + npm_prefix_path)
     proc = subprocess.Popen(
-        ['npm' or npm_executable_path, 'install'],
+        command,
         env={'PATH': os.environ.get('PATH')},
-        cwd=dir_path,
     )
     proc.wait()
-    return os.path.join(dir_path, 'node_modules')
+    return os.path.join(npm_prefix_path, 'node_modules')
 
 
 class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
         files = get_files(
-            settings.NPM_PACKAGE_JSON_PATH, 
             getattr(settings, 'NPM_EXECUTABLE_PATH', None),
-            getattr(settings, 'NPM_CONFIG_FILE_PATH', None),
-            getattr(settings, 'NPM_NODE_MODULES_PATH', None),
+            getattr(settings, 'NPM_PREFIX_PATH', None),
         )
+        destination = getattr(settings, 'NPM_DESTINATION_PREFIX', '')
         self.locations = [
-            ('', files),
+            (destination, files),
         ]
         self.storages = collections.OrderedDict()
 
