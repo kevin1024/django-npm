@@ -2,7 +2,7 @@ from django.conf import settings
 
 settings.configure(DEBUG=True)
 
-from npm.finders import NpmFinder
+from npm.finders import get_files
 
 def test_get_files(tmpdir):
     pjson = tmpdir.join('package.json')
@@ -10,5 +10,5 @@ def test_get_files(tmpdir):
     "name": "test",
     "dependencies": {"mocha": "*"}
     }''')
-    get_files(str(pjson), None)
+    get_files(npm_prefix_path=str(tmpdir))
 
