@@ -12,7 +12,7 @@ except ImportError:
 
 setup(
     name='django-npm',
-    version='0.1.0',
+    version='0.1.1',
     description='A django staticfiles finder that uses npm',
     url='https://github.com/kevin1024/django-npm',
     author='Kevin McCarthy',
