@@ -26,3 +26,13 @@ def test_finder_list(npm_dir):
 def test_finder_find(npm_dir):
     f = NpmFinder()
     assert f.find('mocha/mocha.js')
+
+def test_finder_in_subdirectory(npm_dir):
+    f = NpmFinder()
+    with override_settings(NPM_DESTINATION_PREFIX='lib'):
+        assert f.find('lib/mocha/mocha.js')
+
+def test_no_matching_paths_returns_empty_list(npm_dir):
+    f = NpmFinder()
+    with override_settings(NPM_FILE_PATTERNS={'foo':['bar']}):
+        assert f.find('mocha/mocha.js') == []

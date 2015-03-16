@@ -50,9 +50,10 @@ class NpmFinder(FileSystemFinder):
         self.storages[self.locations[0][1]] = filesystem_storage
 
     def find(self, path, all=False):
+        path = os.path.relpath(path, getattr(settings, 'NPM_DESTINATION_PREFIX',''))
         patterns = getattr(settings, 'NPM_FILE_PATTERNS', None)
         if not matches_patterns(patterns, path):
-            return None
+            return []
         return super(NpmFinder, self).find(path, all=all)
 
     def list(self, ignore_patterns):
