@@ -51,7 +51,8 @@ class NpmFinder(FileSystemFinder):
 
     def find(self, path, all=False):
         patterns = getattr(settings, 'NPM_FILE_PATTERNS', None)
-        if not matches_patterns(patterns, path):
+        relpath = os.path.relpath(path, getattr(settings, 'NPM_DESTINATION_PREFIX',''))
+        if not matches_patterns(patterns, relpath):
             return []
         return super(NpmFinder, self).find(path, all=all)
 

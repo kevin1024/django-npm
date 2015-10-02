@@ -32,6 +32,11 @@ def test_finder_in_subdirectory(npm_dir):
         f = NpmFinder()
         assert f.find('lib/mocha/mocha.js')
 
+def test_finder_with_patterns_in_subdirectory(npm_dir):
+    with override_settings(NPM_DESTINATION_PREFIX='lib',NPM_FILE_PATTERNS={'mocha':['*']}):
+        f = NpmFinder()
+        assert f.find('lib/mocha/mocha.js')
+
 def test_no_matching_paths_returns_empty_list(npm_dir):
     f = NpmFinder()
     with override_settings(NPM_FILE_PATTERNS={'foo':['bar']}):
