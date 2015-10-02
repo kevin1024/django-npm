@@ -9,7 +9,7 @@ Want to use npm modules in your django project without vendoring them? django-np
 3. Make sure you have a `package.json` listing your dependencies
 4. If you use a private registry, make sure your `.npmrc` is set up to connect to it
 5. Add `npm.finders.NpmFinder` to `STATICFILES_FINDERS`
-6. Set some paths in your project's setup.py
+6. Set some paths in your project's `settings.py`
 7. `./manage.py collectstatic`
 
 ## Configuration
