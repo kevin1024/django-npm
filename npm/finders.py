@@ -1,5 +1,3 @@
-import tempfile
-import shutil
 import os
 import subprocess
 from fnmatch import fnmatch
@@ -12,6 +10,7 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 
+
 def get_files(npm_executable_path, npm_prefix_path):
     command = [npm_executable_path, 'install']
     if npm_prefix_path:
@@ -22,6 +21,7 @@ def get_files(npm_executable_path, npm_prefix_path):
     )
     proc.wait()
     return os.path.join(npm_prefix_path, 'node_modules')
+
 
 def matches_patterns(patterns, filename):
     if not patterns:
@@ -51,7 +51,7 @@ class NpmFinder(FileSystemFinder):
 
     def find(self, path, all=False):
         patterns = getattr(settings, 'NPM_FILE_PATTERNS', None)
-        relpath = os.path.relpath(path, getattr(settings, 'NPM_DESTINATION_PREFIX',''))
+        relpath = os.path.relpath(path, getattr(settings, 'NPM_DESTINATION_PREFIX', ''))
         if not matches_patterns(patterns, relpath):
             return []
         return super(NpmFinder, self).find(path, all=all)
