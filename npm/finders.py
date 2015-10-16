@@ -12,8 +12,8 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 
-def get_files(npm_executable_path=None, npm_prefix_path=None):
-    command = ['npm' or npm_executable_path, 'install']
+def get_files(npm_executable_path, npm_prefix_path):
+    command = [npm_executable_path, 'install']
     if npm_prefix_path:
         command.append('--prefix=' + npm_prefix_path)
     proc = subprocess.Popen(
@@ -36,8 +36,8 @@ def matches_patterns(patterns, filename):
 class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
         files = get_files(
-            getattr(settings, 'NPM_EXECUTABLE_PATH', None),
-            getattr(settings, 'NPM_PREFIX_PATH', None),
+            getattr(settings, 'NPM_EXECUTABLE_PATH', 'npm'),
+            getattr(settings, 'NPM_PREFIX_PATH', '.'),
         )
         destination = getattr(settings, 'NPM_DESTINATION_PREFIX', '')
         self.locations = [
