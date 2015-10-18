@@ -36,6 +36,7 @@ When you do a `./manage.py collectstatic`, django-npm will run `npm install` for
 
 ## Changelog
 
+* v0.1.4 - Fix bug with `NPM_EXECUTABLE_PATH` (thanks @yohanboniface)
 * v0.1.3 - Actually fix destination bug
 * v0.1.2 - Fix bug with destination prefix
 * v0.1.1 - manage.py runserver bugfix
