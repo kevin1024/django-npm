@@ -1,5 +1,3 @@
-import tempfile
-import shutil
 import os
 import subprocess
 from fnmatch import fnmatch
@@ -12,8 +10,9 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 
-def get_files(npm_executable_path=None, npm_prefix_path=None):
-    command = ['npm' or npm_executable_path, 'install']
+
+def get_files(npm_executable_path='npm', npm_prefix_path='.'):
+    command = [npm_executable_path, 'install']
     if npm_prefix_path:
         command.append('--prefix=' + npm_prefix_path)
     proc = subprocess.Popen(
@@ -22,6 +21,7 @@ def get_files(npm_executable_path=None, npm_prefix_path=None):
     )
     proc.wait()
     return os.path.join(npm_prefix_path, 'node_modules')
+
 
 def matches_patterns(patterns, filename):
     if not patterns:
@@ -35,10 +35,12 @@ def matches_patterns(patterns, filename):
 
 class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
-        files = get_files(
-            getattr(settings, 'NPM_EXECUTABLE_PATH', None),
-            getattr(settings, 'NPM_PREFIX_PATH', None),
-        )
+        files_settings = {}
+        if hasattr(settings, 'NPM_EXECUTABLE_PATH'):
+            files_settings['npm_executable_path'] = settings.NPM_EXECUTABLE_PATH
+        if hasattr(settings, 'NPM_PREFIX_PATH'):
+            files_settings['npm_prefix_path'] = settings.NPM_PREFIX_PATH
+        files = get_files(**files_settings)
         destination = getattr(settings, 'NPM_DESTINATION_PREFIX', '')
         self.locations = [
             (destination, files),
@@ -51,7 +53,7 @@ class NpmFinder(FileSystemFinder):
 
     def find(self, path, all=False):
         patterns = getattr(settings, 'NPM_FILE_PATTERNS', None)
-        relpath = os.path.relpath(path, getattr(settings, 'NPM_DESTINATION_PREFIX',''))
+        relpath = os.path.relpath(path, getattr(settings, 'NPM_DESTINATION_PREFIX', ''))
         if not matches_patterns(patterns, relpath):
             return []
         return super(NpmFinder, self).find(path, all=all)
