@@ -11,7 +11,9 @@ except ImportError:
     from ordereddict import OrderedDict
 
 
-def get_files(npm_executable_path='npm', npm_prefix_path='.'):
+def npm_install():
+    npm_executable_path = getattr(settings, 'NPM_EXECUTABLE_PATH', 'npm')
+    npm_prefix_path = getattr(settings, 'NPM_PREFIX_PATH', '.')
     command = [npm_executable_path, 'install']
     if npm_prefix_path:
         command.append('--prefix=' + npm_prefix_path)
@@ -20,8 +22,9 @@ def get_files(npm_executable_path='npm', npm_prefix_path='.'):
         env={'PATH': os.environ.get('PATH')},
     )
     proc.wait()
-    return os.path.join(npm_prefix_path, 'node_modules')
 
+def get_files(npm_prefix_path='.'):
+    return os.path.join(npm_prefix_path, 'node_modules')
 
 def matches_patterns(patterns, filename):
     if not patterns:

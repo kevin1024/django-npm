@@ -3,7 +3,7 @@ configure_settings()
 from django.test.utils import override_settings
 import pytest
 
-from npm.finders import get_files, NpmFinder
+from npm.finders import get_files, NpmFinder, npm_install
 
 @pytest.yield_fixture
 def npm_dir(tmpdir):
@@ -13,6 +13,7 @@ def npm_dir(tmpdir):
     "dependencies": {"mocha": "*"}
     }''')
     with override_settings(NPM_PREFIX_PATH=str(tmpdir)):
+        npm_install()
         yield tmpdir
 
 
@@ -33,11 +34,11 @@ def test_finder_in_subdirectory(npm_dir):
         assert f.find('lib/mocha/mocha.js')
 
 def test_finder_with_patterns_in_subdirectory(npm_dir):
-    with override_settings(NPM_DESTINATION_PREFIX='lib',NPM_FILE_PATTERNS={'mocha':['*']}):
+    with override_settings(NPM_DESTINATION_PREFIX='lib', NPM_FILE_PATTERNS={'mocha': ['*']}):
         f = NpmFinder()
         assert f.find('lib/mocha/mocha.js')
 
 def test_no_matching_paths_returns_empty_list(npm_dir):
     f = NpmFinder()
-    with override_settings(NPM_FILE_PATTERNS={'foo':['bar']}):
+    with override_settings(NPM_FILE_PATTERNS={'foo': ['bar']}):
         assert f.find('mocha/mocha.js') == []
