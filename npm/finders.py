@@ -1,6 +1,7 @@
 import os
 import subprocess
 from fnmatch import fnmatch
+from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
@@ -14,6 +15,8 @@ except ImportError:
 def npm_install():
     npm_executable_path = getattr(settings, 'NPM_EXECUTABLE_PATH', 'npm')
     npm_prefix_path = getattr(settings, 'NPM_PREFIX_PATH', '.')
+
+def get_node_modules_files(npm_executable_path='npm', npm_prefix_path='.'):
     command = [npm_executable_path, 'install']
     if npm_prefix_path:
         command.append('--prefix=' + npm_prefix_path)
@@ -23,17 +26,49 @@ def npm_install():
     )
     proc.wait()
 
+
 def get_files(npm_prefix_path='.'):
     return os.path.join(npm_prefix_path, 'node_modules')
 
-def matches_patterns(patterns, filename):
-    if not patterns:
+
+def flatten_patterns(patterns):
+    return [
+        os.path.join(module, module_pattern)
+        for module, module_patterns in patterns.items()
+        for module_pattern in module_patterns
+    ]
+
+
+def match(name, patterns, is_dir=False):
+    if is_dir and any(pattern.startswith(name) for pattern in patterns):
         return True
-    for module, module_patterns in patterns.items():
-        for module_pattern in module_patterns:
-            if fnmatch(filename, os.path.join(module, module_pattern)):
-                return True
-    return False
+    return django_utils.matches_patterns(name, patterns)
+
+
+def get_files(storage, ignore_patterns=None, match_patterns=None, location=''):
+    if ignore_patterns is None:
+        ignore_patterns = []
+    if match_patterns is None:
+        match_patterns = []
+
+    directories, files = storage.listdir(location)
+    for fn in files:
+        if django_utils.matches_patterns(fn, ignore_patterns):
+            continue
+        if location:
+            fn = os.path.join(location, fn)
+        if not match(fn, match_patterns):
+            continue
+        yield fn
+    for dir in directories:
+        if django_utils.matches_patterns(dir, ignore_patterns):
+            continue
+        if location:
+            dir = os.path.join(location, dir)
+        if not match(dir, match_patterns, is_dir=True):
+            continue
+        for fn in get_files(storage, ignore_patterns, match_patterns, dir):
+            yield fn
 
 
 class NpmFinder(FileSystemFinder):
@@ -43,7 +78,7 @@ class NpmFinder(FileSystemFinder):
             files_settings['npm_executable_path'] = settings.NPM_EXECUTABLE_PATH
         if hasattr(settings, 'NPM_PREFIX_PATH'):
             files_settings['npm_prefix_path'] = settings.NPM_PREFIX_PATH
-        files = get_files(**files_settings)
+        files = get_node_modules_files(**files_settings)
         destination = getattr(settings, 'NPM_DESTINATION_PREFIX', '')
         self.locations = [
             (destination, files),
@@ -55,9 +90,9 @@ class NpmFinder(FileSystemFinder):
         self.storages[self.locations[0][1]] = filesystem_storage
 
     def find(self, path, all=False):
-        patterns = getattr(settings, 'NPM_FILE_PATTERNS', None)
+        patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None))
         relpath = os.path.relpath(path, getattr(settings, 'NPM_DESTINATION_PREFIX', ''))
-        if not matches_patterns(patterns, relpath):
+        if not django_utils.matches_patterns(patterns, relpath):
             return []
         return super(NpmFinder, self).find(path, all=all)
 
@@ -65,7 +100,8 @@ class NpmFinder(FileSystemFinder):
         """
         List all files in all locations.
         """
-        patterns = getattr(settings, 'NPM_FILE_PATTERNS', None)
-        results = super(NpmFinder, self).list(ignore_patterns)
-        matches = [(path, storage) for path, storage in results if matches_patterns(patterns, path)]
-        return matches
+        match_patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None))
+        for prefix, root in self.locations:
+            storage = self.storages[root]
+            for path in get_files(storage, ignore_patterns, match_patterns):
+                yield path, storage
