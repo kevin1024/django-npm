@@ -82,7 +82,7 @@ class NpmFinder(FileSystemFinder):
             return []
         return super(NpmFinder, self).find(path, all=all)
 
-    def list(self, ignore_patterns=None): # TODO not used, add setting
+    def list(self, ignore_patterns=None): # TODO should be configurable, add setting
         """List all files in all locations."""
         for prefix, root in self.locations:
             storage = self.storages[root]

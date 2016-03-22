@@ -9,6 +9,7 @@ from npm.finders import get_files, NpmFinder, npm_install
 
 configure_settings()
 
+
 @pytest.yield_fixture
 def npm_dir(tmpdir):
     pjson = tmpdir.join('package.json')
@@ -32,8 +33,8 @@ def test_finder_list_all(npm_dir):
 
 def test_finder_find(npm_dir):
     f = NpmFinder()
-    files = f.find('mocha/mocha.js')
-    assert files
+    file = f.find('mocha/mocha.js')
+    assert file
 
 def test_finder_in_subdirectory(npm_dir):
     with override_settings(NPM_STATIC_FILES_PREFIX='lib'):
@@ -49,9 +50,3 @@ def test_no_matching_paths_returns_empty_list(npm_dir):
     with override_settings(NPM_FILE_PATTERNS={'foo': ['bar']}):
         f = NpmFinder()
         assert f.find('mocha/mocha.js') == []
-
-def test_finder_with_patterns_one_file(npm_dir):
-    with override_settings(NPM_FILE_PATTERNS={'mocha': ['mocha.js']}):
-        f = NpmFinder()
-        assert f.find('lib/mocha/mocha.js')
-        assert sum(1 for _ in f.list()) == 1
