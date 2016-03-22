@@ -13,7 +13,7 @@ except ImportError:
 
 def npm_install():
     npm_executable_path = getattr(settings, 'NPM_EXECUTABLE_PATH', 'npm')
-    npm_prefix_path = getattr(settings, 'NPM_PREFIX_PATH', '.')
+    npm_prefix_path = NpmFinder().node_modules_path
     command = [npm_executable_path, 'install']
     if npm_prefix_path:
         command.append('--prefix=' + npm_prefix_path)
@@ -22,11 +22,6 @@ def npm_install():
         env={'PATH': os.environ.get('PATH')},
     )
     proc.wait()
-
-
-def get_node_modules_files():
-    npm_prefix_path = getattr(settings, 'NPM_PREFIX_PATH', '.')
-    return os.path.join(npm_prefix_path, 'node_modules')
 
 
 def flatten_patterns(patterns):
@@ -43,11 +38,11 @@ def may_contain_match(directory, patterns):
     return any(pattern.startswith(directory) for pattern in patterns)
 
 
-def get_files(storage, ignore_patterns=None, match_patterns=None, location=''):
+def get_files(storage, match_patterns='*', ignore_patterns=None, location=''):
     if ignore_patterns is None:
         ignore_patterns = []
     if match_patterns is None:
-        match_patterns = ['*']
+        match_patterns = []
 
     directories, files = storage.listdir(location)
     for fn in files:
@@ -64,15 +59,17 @@ def get_files(storage, ignore_patterns=None, match_patterns=None, location=''):
         if location:
             dir = os.path.join(location, dir)
         if may_contain_match(dir, match_patterns) or django_utils.matches_patterns(dir, match_patterns):
-            for fn in get_files(storage, ignore_patterns, match_patterns, dir):
+            for fn in get_files(storage, match_patterns, ignore_patterns, dir):
                 yield fn
 
 
 class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
-        source = os.path.join(getattr(settings, 'NPM_PREFIX_PATH', '.'), 'node_modules')
-        destination = getattr(settings, 'NPM_DESTINATION_PREFIX', '')
-        self.locations = [(destination, source), ]
+        self.node_modules_path = getattr(settings, 'NPM_PREFIX_PATH', '.')
+        self.destination = getattr(settings, 'NPM_DESTINATION_PREFIX', '')
+
+        self.match_patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None)) or ['*']
+        self.locations = [(self.destination, os.path.join(self.node_modules_path, 'node_modules'))]
         self.storages = OrderedDict()
 
         filesystem_storage = FileSystemStorage(location=self.locations[0][1])
@@ -80,16 +77,14 @@ class NpmFinder(FileSystemFinder):
         self.storages[self.locations[0][1]] = filesystem_storage
 
     def find(self, path, all=False):
-        patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None))
-        relpath = os.path.relpath(path, getattr(settings, 'NPM_DESTINATION_PREFIX', ''))
-        if not django_utils.matches_patterns(patterns, relpath):
+        relpath = os.path.relpath(path, self.destination)
+        if not django_utils.matches_patterns(relpath, self.match_patterns):
             return []
         return super(NpmFinder, self).find(path, all=all)
 
     def list(self, ignore_patterns=None): # TODO not used, add setting
         """List all files in all locations."""
-        match_patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None))
         for prefix, root in self.locations:
             storage = self.storages[root]
-            for path in get_files(storage, ignore_patterns, match_patterns):
+            for path in get_files(storage, self.match_patterns, ignore_patterns):
                 yield path, storage

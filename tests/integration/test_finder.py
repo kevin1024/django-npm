@@ -23,16 +23,17 @@ def npm_dir(tmpdir):
 
 def test_get_files(npm_dir):
     storage = FileSystemStorage(location=str(npm_dir))
-    files = get_files(storage)
+    files = get_files(storage, match_patterns='*')
     assert any([True for _ in files])
 
 def test_finder_list_all(npm_dir):
     f = NpmFinder()
-    assert any(True for _ in f.list())
+    assert any([True for _ in f.list()])
 
 def test_finder_find(npm_dir):
     f = NpmFinder()
-    assert f.find('mocha/mocha.js')
+    files = f.find('mocha/mocha.js')
+    assert files
 
 def test_finder_in_subdirectory(npm_dir):
     with override_settings(NPM_DESTINATION_PREFIX='lib'):
