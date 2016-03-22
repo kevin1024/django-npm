@@ -13,15 +13,16 @@ except ImportError:
 
 def npm_install():
     npm_executable_path = getattr(settings, 'NPM_EXECUTABLE_PATH', 'npm')
-    NPM_ROOT_PATH = NpmFinder().node_modules_path
-    command = [npm_executable_path, 'install']
-    if NPM_ROOT_PATH:
-        command.append('--prefix=' + NPM_ROOT_PATH)
+    command = [npm_executable_path, 'install', '--prefix=' + get_npm_root_path()]
     proc = subprocess.Popen(
         command,
         env={'PATH': os.environ.get('PATH')},
     )
     proc.wait()
+
+
+def get_npm_root_path():
+    return getattr(settings, 'NPM_ROOT_PATH', '.')
 
 
 def flatten_patterns(patterns):
@@ -65,7 +66,7 @@ def get_files(storage, match_patterns='*', ignore_patterns=None, location=''):
 
 class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
-        self.node_modules_path = getattr(settings, 'NPM_ROOT_PATH', '.')
+        self.node_modules_path = get_npm_root_path()
         self.destination = getattr(settings, 'NPM_STATIC_FILES_PREFIX', '')
 
         self.match_patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None)) or ['*']
@@ -82,7 +83,7 @@ class NpmFinder(FileSystemFinder):
             return []
         return super(NpmFinder, self).find(path, all=all)
 
-    def list(self, ignore_patterns=None): # TODO not used, add setting
+    def list(self, ignore_patterns=None):  # TODO should be configurable, add setting
         """List all files in all locations."""
         for prefix, root in self.locations:
             storage = self.storages[root]
