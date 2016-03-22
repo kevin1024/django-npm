@@ -13,10 +13,10 @@ except ImportError:
 
 def npm_install():
     npm_executable_path = getattr(settings, 'NPM_EXECUTABLE_PATH', 'npm')
-    npm_prefix_path = NpmFinder().node_modules_path
+    NPM_ROOT_PATH = NpmFinder().node_modules_path
     command = [npm_executable_path, 'install']
-    if npm_prefix_path:
-        command.append('--prefix=' + npm_prefix_path)
+    if NPM_ROOT_PATH:
+        command.append('--prefix=' + NPM_ROOT_PATH)
     proc = subprocess.Popen(
         command,
         env={'PATH': os.environ.get('PATH')},
@@ -65,8 +65,8 @@ def get_files(storage, match_patterns='*', ignore_patterns=None, location=''):
 
 class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
-        self.node_modules_path = getattr(settings, 'NPM_PREFIX_PATH', '.')
-        self.destination = getattr(settings, 'NPM_DESTINATION_PREFIX', '')
+        self.node_modules_path = getattr(settings, 'NPM_ROOT_PATH', '.')
+        self.destination = getattr(settings, 'NPM_STATIC_FILES_PREFIX', '')
 
         self.match_patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None)) or ['*']
         self.locations = [(self.destination, os.path.join(self.node_modules_path, 'node_modules'))]

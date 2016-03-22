@@ -15,20 +15,19 @@ Want to use npm modules in your django project without vendoring them? django-np
 ## Configuration
 
 
- * `NPM_PREFIX_PATH`: *absolute* path to the npm "prefix' directory - this is where npm will look for your `package.json`, put your `node_modules` folder and look for a `.npmrc` file
+ * `NPM_ROOT_PATH`: *absolute* path to the npm "root" directory - this is where npm will look for your `package.json`, put your `node_modules` folder and look for a `.npmrc` file
  * `NPM_EXECUTABLE_PATH`: (optional) defaults to wherever `npm` is on your PATH.  If you specify this, you can override the path to the `npm` executable.  This is also an *absolute path*.
- * `NPM_DESTINATION_PREFIX`: (optional) Your npm files will end up under this path inside static.  I usually use something like 'js/lib' (so your files will be in /static/js/lib/react.js for example) but you can leave it blank and they will just end up in the root.
+ * `NPM_STATIC_FILES_PREFIX`: (optional) Your npm files will end up under this path inside static.  I usually use something like 'js/lib' (so your files will be in /static/js/lib/react.js for example) but you can leave it blank and they will just end up in the root.
+ * `NPM_FILE_PATTERNS`: (optional) By default, django-npm will expose all files in `node_modules` to Django as staticfiles.  You may not want *all* of them to be exposed.  You can pick specific files by adding some additional configuration:
 
-By default, django-npm will expose all files in `node_modules` to Django as staticfiles.  You may not want *all* of them to be exposed.  You can pick specific files by adding some additional configuration:
+    ```python
+    NPM_FILE_PATTERNS = {
+        'react': ['react.js'],
+        'express': ['lib/*.js', 'index.js']
+    }
+    ```
 
-```python
-NPM_FILE_PATTERNS = {
-    'react': ['react.js'],
-    'express': ['lib/*.js', 'index.js']
-}
-```
-
-Keys are the names of the npm modules, and values are lists containing strings.  The strings match against glob patterns.
+    Keys are the names of the npm modules, and values are lists containing strings.  The strings match against glob patterns.
 
 ## Usage
 

@@ -16,7 +16,7 @@ def npm_dir(tmpdir):
     "name": "test",
     "dependencies": {"mocha": "*"}
     }''')
-    with override_settings(NPM_PREFIX_PATH=str(tmpdir)):
+    with override_settings(NPM_ROOT_PATH=str(tmpdir)):
         npm_install()
         yield tmpdir
 
@@ -36,12 +36,12 @@ def test_finder_find(npm_dir):
     assert files
 
 def test_finder_in_subdirectory(npm_dir):
-    with override_settings(NPM_DESTINATION_PREFIX='lib'):
+    with override_settings(NPM_STATIC_FILES_PREFIX='lib'):
         f = NpmFinder()
         assert f.find('lib/mocha/mocha.js')
 
 def test_finder_with_patterns_in_subdirectory(npm_dir):
-    with override_settings(NPM_DESTINATION_PREFIX='lib', NPM_FILE_PATTERNS={'mocha': ['*']}):
+    with override_settings(NPM_STATIC_FILES_PREFIX='lib', NPM_FILE_PATTERNS={'mocha': ['*']}):
         f = NpmFinder()
         assert f.find('lib/mocha/mocha.js')
 
