@@ -4,16 +4,15 @@ Want to use npm modules in your django project without vendoring them? django-np
 
 ## Installation
 
-1. `pip install django-npm`
-2. Make sure you have npm installed
-3. Make sure you have a `package.json` listing your dependencies
-4. If you use a private registry, make sure your `.npmrc` is set up to connect to it
-5. Add `npm.finders.NpmFinder` to `STATICFILES_FINDERS`
-6. Set some paths in your project's `settings.py`
-7. `./manage.py collectstatic`
+1. `$ pip install django-npm`
+2. Install npm. If you use a private registry, make sure your `.npmrc` is set up to connect to it
+3. Have a `package.json` at the root of your project, listing your dependencies
+4. Add `npm.finders.NpmFinder` to `STATICFILES_FINDERS`
+5. Configure your `settings.py`
+6. `$ npm install` with the command line, or with Python: `from npm.finder import npm_install; npm_install()`
+7. `$ ./manage.py collectstatic` will copy all selected node_modules files into your `STATIC_ROOT`.
 
 ## Configuration
-
 
  * `NPM_ROOT_PATH`: *absolute* path to the npm "root" directory - this is where npm will look for your `package.json`, put your `node_modules` folder and look for a `.npmrc` file
  * `NPM_EXECUTABLE_PATH`: (optional) defaults to wherever `npm` is on your PATH.  If you specify this, you can override the path to the `npm` executable.  This is also an *absolute path*.
@@ -29,12 +28,12 @@ Want to use npm modules in your django project without vendoring them? django-np
 
     Keys are the names of the npm modules, and values are lists containing strings.  The strings match against glob patterns.
 
-## Usage
+ * `NPM_FINDER_USE_CACHE`: (default True) A boolean that enables cache in the finder. If enabled, the file list will be computed only once, when the server is started.
 
-When you do a `./manage.py collectstatic`, django-npm will run `npm install` for you and copy all the files into your `STATIC_ROOT`.
 
 ## Changelog
 
+* v0.2.0 - Improve speed, separate `npm install` from the finder
 * v0.1.4 - Fix bug with `NPM_EXECUTABLE_PATH` (thanks @yohanboniface)
 * v0.1.3 - Actually fix destination bug
 * v0.1.2 - Fix bug with destination prefix

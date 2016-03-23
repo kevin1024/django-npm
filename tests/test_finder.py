@@ -1,17 +1,20 @@
-from ..util import configure_settings
+from .util import configure_settings
 configure_settings()
-from django.core.files.storage import FileSystemStorage
-from django.test.utils import override_settings
 
 import pytest
 
-from npm.finders import get_files, NpmFinder, npm_install
+from django.core.files.storage import FileSystemStorage
+from django.test.utils import override_settings
+
+from npm.finders import get_files
+from npm.finders import NpmFinder
+from npm.finders import npm_install
 
 
 @pytest.yield_fixture
 def npm_dir(tmpdir):
-    pjson = tmpdir.join('package.json')
-    pjson.write('''{
+    package_json = tmpdir.join('package.json')
+    package_json.write('''{
     "name": "test",
     "dependencies": {"mocha": "*"}
     }''')
@@ -48,3 +51,17 @@ def test_no_matching_paths_returns_empty_list(npm_dir):
     with override_settings(NPM_FILE_PATTERNS={'foo': ['bar']}):
         f = NpmFinder()
         assert f.find('mocha/mocha.js') == []
+
+def test_finder_cache(npm_dir):
+    with override_settings(NPM_FINDER_USE_CACHE=True):
+        f = NpmFinder()
+        f.list()
+        assert f.cached_list is not None
+        assert f.list() is f.cached_list
+
+def test_finder_no_cache(npm_dir):
+    with override_settings(NPM_FINDER_USE_CACHE=False):
+        f = NpmFinder()
+        f.list()
+        assert f.cached_list is None
+        assert f.list() is not f.cached_list

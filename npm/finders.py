@@ -1,5 +1,6 @@
 import os
 import subprocess
+
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
@@ -68,6 +69,8 @@ class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
         self.node_modules_path = get_npm_root_path()
         self.destination = getattr(settings, 'NPM_STATIC_FILES_PREFIX', '')
+        self.cache_enabled = getattr(settings, 'NPM_FINDER_USE_CACHE', True)
+        self.cached_list = None
 
         self.match_patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None)) or ['*']
         self.locations = [(self.destination, os.path.join(self.node_modules_path, 'node_modules'))]
@@ -85,6 +88,13 @@ class NpmFinder(FileSystemFinder):
 
     def list(self, ignore_patterns=None):  # TODO should be configurable, add setting
         """List all files in all locations."""
+        if self.cache_enabled:
+            if self.cached_list is None:
+                self.cached_list = list(self._make_list_generator(ignore_patterns))
+            return self.cached_list
+        return self._make_list_generator(ignore_patterns)
+
+    def _make_list_generator(self, ignore_patterns=None):
         for prefix, root in self.locations:
             storage = self.storages[root]
             for path in get_files(storage, self.match_patterns, ignore_patterns):
