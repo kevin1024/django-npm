@@ -30,10 +30,18 @@ Want to use npm modules in your django project without vendoring them? django-np
 
  * `NPM_FINDER_USE_CACHE`: (default True) A boolean that enables cache in the finder. If enabled, the file list will be computed only once, when the server is started.
 
+## npm install
+
+If you want to run `npm install` programmatically, you can do:
+
+```python
+from npm.finders import npm_install
+npm_install()
+```
 
 ## Changelog
 
-* v0.2.0 - Improve speed, separate `npm install` from the finder
+* v1.0.0 - Improve speed, separate `npm install` from the finder
 * v0.1.4 - Fix bug with `NPM_EXECUTABLE_PATH` (thanks @yohanboniface)
 * v0.1.3 - Actually fix destination bug
 * v0.1.2 - Fix bug with destination prefix
