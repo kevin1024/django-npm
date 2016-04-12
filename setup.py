@@ -1,5 +1,4 @@
 from setuptools import setup, find_packages  # Always prefer setuptools over distutils
-from codecs import open  # To use a consistent encoding
 from os import path
 
 here = path.abspath(path.dirname(__file__))
@@ -12,7 +11,7 @@ except ImportError:
 
 setup(
     name='django-npm',
-    version='0.1.4',
+    version='1.0.0',
     description='A django staticfiles finder that uses npm',
     url='https://github.com/kevin1024/django-npm',
     author='Kevin McCarthy',
@@ -35,7 +34,7 @@ setup(
     keywords='django npm staticfiles',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=requirements,
-    extras_require = {
+    extras_require={
         'test': ['pytest'],
     },
 )
