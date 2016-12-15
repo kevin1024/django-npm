@@ -9,7 +9,7 @@ Want to use npm modules in your django project without vendoring them? django-np
 3. Have a `package.json` at the root of your project, listing your dependencies
 4. Add `npm.finders.NpmFinder` to `STATICFILES_FINDERS`
 5. Configure your `settings.py`
-6. `$ npm install` with the command line, or with Python: `from npm.finder import npm_install; npm_install()`
+6. `$ npm install` with the command line, or with Python: `from npm.finders import npm_install; npm_install()`
 7. `$ ./manage.py collectstatic` will copy all selected node_modules files into your `STATIC_ROOT`.
 
 ## Configuration
