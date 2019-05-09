@@ -17,6 +17,7 @@ setup(
     author='Kevin McCarthy',
     author_email='me@kevinmccarthy.org',
     license='MIT',
+    include_package_data=True,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
