@@ -1,5 +1,6 @@
 import os
 import subprocess
+from fnmatch import fnmatch
 
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
@@ -36,8 +37,19 @@ def flatten_patterns(patterns):
     ]
 
 
+def fnmatch_sub(directory, pattern):
+    """
+    Match a directory against a potentially longer pattern containing
+    wildcards in the path components. fnmatch does the globbing, but there
+    appears to be no built-in way to match only the beginning of a pattern.
+    """
+    length = len(directory.split(os.sep))
+    components = pattern.split(os.sep)[:length]
+    return fnmatch(directory, os.sep.join(components))
+
+
 def may_contain_match(directory, patterns):
-    return any(pattern.startswith(directory) for pattern in patterns)
+    return any(fnmatch_sub(directory, pattern) for pattern in patterns)
 
 
 def get_files(storage, match_patterns='*', ignore_patterns=None, location=''):
