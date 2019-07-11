@@ -19,17 +19,13 @@ app = apps.get_app_config("npm")
 def npm_install(**config):
     npm_executable_path = config.setdefault('npm_executable_path', app.NPM_EXECUTABLE_PATH)
 
-    command = [npm_executable_path, 'install', '--prefix=' + get_npm_root_path()]
+    command = [npm_executable_path, 'install', '--prefix=' + app.NPM_ROOT_PATH]
 
     proc = subprocess.Popen(
         command,
         env={'PATH': os.environ.get('PATH')},
     )
     proc.wait()
-
-
-def get_npm_root_path():
-    return getattr(settings, 'NPM_ROOT_PATH', '.')
 
 
 def flatten_patterns(patterns):
@@ -84,7 +80,7 @@ def get_files(storage, match_patterns='*', ignore_patterns=None, location=''):
 
 class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
-        self.node_modules_path = get_npm_root_path()
+        self.node_modules_path = app.NPM_ROOT_PATH
         self.destination = getattr(settings, 'NPM_STATIC_FILES_PREFIX', '')
         self.cache_enabled = getattr(settings, 'NPM_FINDER_USE_CACHE', True)
         self.cached_list = None
