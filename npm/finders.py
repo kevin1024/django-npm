@@ -2,20 +2,25 @@ import os
 import subprocess
 from fnmatch import fnmatch
 
+from django.apps import apps
+from django.conf import settings
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
-from django.conf import settings
 
 try:
     from collections import OrderedDict
 except ImportError:
     from ordereddict import OrderedDict
 
+app = apps.get_app_config("npm")
 
-def npm_install():
-    npm_executable_path = getattr(settings, 'NPM_EXECUTABLE_PATH', 'npm')
+
+def npm_install(**config):
+    npm_executable_path = config.setdefault('npm_executable_path', app.NPM_EXECUTABLE_PATH)
+
     command = [npm_executable_path, 'install', '--prefix=' + get_npm_root_path()]
+
     proc = subprocess.Popen(
         command,
         env={'PATH': os.environ.get('PATH')},
