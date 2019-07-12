@@ -1,14 +1,19 @@
+from __future__ import print_function
+
 import os
 import shlex
 import subprocess
+import sys
 from fnmatch import fnmatch
+from logging import getLogger
 
 from django.apps import apps
 from django.conf import settings
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
-from django.utils.six import string_types
+
+logger = getLogger(__name__)
 
 try:
     from collections import OrderedDict
@@ -24,21 +29,29 @@ def npm_install(**config):
     node_executable = "D:\\Program Files\\nodejs\\node.exe"
     npm_cli = os.path.join(os.path.dirname(node_executable),
                            "node_modules\\npm\\bin\\npm-cli.js")
-    :param config: npm_executable
-    :return:
+    NPM_EXECUTABLE_PATH = '"%s" "%s"' % (node_executable, npm_cli)
     """
     npm_executable = config.setdefault('npm_executable', app.NPM_EXECUTABLE_PATH)
+    npm_workdir = config.setdefault('npm_workdir', os.getcwd())
+    npm_args = config.setdefault('npm_args', ())
 
-    if isinstance(npm_executable, string_types):
-        npm_executable = shlex.split(npm_executable)
+    command = shlex.split(npm_executable)
 
-    command = npm_executable + ['install', '--prefix=' + app.NPM_ROOT_PATH]
+    if not npm_args:
+        command.extend(['install', '--prefix=' + app.NPM_ROOT_PATH])
+
+    logger.debug(str(command))
 
     proc = subprocess.Popen(
         command,
-        env={'PATH': os.environ.get('PATH')},
+        env=os.environ,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        cwd=npm_workdir,
+        bufsize=2048
     )
-    proc.wait()
+    for data in iter(proc.stdout.readline, ''):
+        print(data, file=sys.stdout, end='')
 
 
 def flatten_patterns(patterns):
