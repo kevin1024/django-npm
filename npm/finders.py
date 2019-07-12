@@ -8,7 +8,6 @@ from fnmatch import fnmatch
 from logging import getLogger
 
 from django.apps import apps
-from django.conf import settings
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
@@ -42,8 +41,6 @@ def npm_install(**config):
     else:
         command.extend(npm_command_args)
 
-    logger.debug(str(command))
-
     proc = subprocess.Popen(
         command,
         env=os.environ,
@@ -55,6 +52,7 @@ def npm_install(**config):
     while proc.poll() is None:
         for data in iter(proc.stdout.readline, ''):
             print(data, file=sys.stdout, end='')
+    logger.debug("%s %s" % (proc.poll(), command))
     # npm code
     return proc.poll()
 
