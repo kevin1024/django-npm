@@ -23,13 +23,7 @@ app_config = apps.get_app_config("npm")
 
 
 def npm_install(**config):
-    """
-    Windows settings
-    node_executable = "D:\\Program Files\\nodejs\\node.exe"
-    npm_cli = os.path.join(os.path.dirname(node_executable),
-                           "node_modules\\npm\\bin\\npm-cli.js")
-    NPM_EXECUTABLE_PATH = '"%s" "%s"' % (node_executable, npm_cli)
-    """
+    """Install nodejs packages"""
     npm_executable = config.setdefault('npm_executable', app_config.NPM_EXECUTABLE_PATH)
     npm_workdir = config.setdefault('npm_workdir', os.getcwd())
     npm_command_args = config.setdefault('npm_command_args', ())
