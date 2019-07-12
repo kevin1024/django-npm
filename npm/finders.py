@@ -40,7 +40,6 @@ def npm_install(**config):
         command.extend(['install', '--prefix=' + app_config.NPM_ROOT_PATH])
     else:
         command.extend(npm_command_args)
-        command.extend(['--no-save'])
 
     proc = subprocess.Popen(
         command,
