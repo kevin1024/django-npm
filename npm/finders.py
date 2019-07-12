@@ -4,6 +4,8 @@ import os
 import shlex
 import subprocess
 import sys
+import threading
+import time
 from fnmatch import fnmatch
 from logging import getLogger
 
@@ -20,6 +22,28 @@ except ImportError:
     from ordereddict import OrderedDict
 
 app_config = apps.get_app_config("npm")
+
+
+class StdinWriter(threading.Thread):
+    def __init__(self, proc):
+        threading.Thread.__init__(self)
+        self.proc = proc
+
+    def do_input(self):
+        data = sys.stdin.readline()
+        self.proc.stdin.write(data)
+        if not data.strip(os.linesep):
+            time.sleep(1)
+
+    def run(self):
+        while self.proc.poll() is None:
+            try:
+                self.do_input()
+            except (IOError, ValueError):
+                break
+
+    def close(self):
+        self.proc.stdin.close()
 
 
 def npm_install(**config):
@@ -40,12 +64,23 @@ def npm_install(**config):
         env=os.environ,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        stdin=subprocess.PIPE,
+        universal_newlines=True,
         cwd=npm_workdir,
         bufsize=2048
     )
-    while proc.poll() is None:
-        for data in iter(proc.stdout.readline, ''):
+    writer = StdinWriter(proc)
+    writer.start()
+    try:
+        while proc.poll() is None:
+            data = proc.stdout.read(1)
+            if not data:
+                break
             print(data, file=sys.stdout, end='')
+    finally:
+        proc.stdout.close()
+        writer.close()
+
     logger.debug("%s %s" % (proc.poll(), command))
     # npm code
     return proc.poll()
