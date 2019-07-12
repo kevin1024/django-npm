@@ -11,3 +11,7 @@ class NPMConfig(AppConfig):
     # app settings
     NPM_EXECUTABLE_PATH = getattr(settings, 'NPM_EXECUTABLE_PATH', 'npm')
     NPM_ROOT_PATH = getattr(settings, 'NPM_ROOT_PATH', os.getcwd())
+
+    NPM_STATIC_FILES_PREFIX = getattr(settings, 'NPM_STATIC_FILES_PREFIX', '')
+    NPM_FINDER_USE_CACHE = getattr(settings, 'NPM_FINDER_USE_CACHE', True)
+    NPM_FILE_PATTERNS = getattr(settings, 'NPM_FILE_PATTERNS', None)

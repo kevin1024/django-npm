@@ -20,7 +20,7 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 
-app = apps.get_app_config("npm")
+app_config = apps.get_app_config("npm")
 
 
 def npm_install(**config):
@@ -31,14 +31,14 @@ def npm_install(**config):
                            "node_modules\\npm\\bin\\npm-cli.js")
     NPM_EXECUTABLE_PATH = '"%s" "%s"' % (node_executable, npm_cli)
     """
-    npm_executable = config.setdefault('npm_executable', app.NPM_EXECUTABLE_PATH)
+    npm_executable = config.setdefault('npm_executable', app_config.NPM_EXECUTABLE_PATH)
     npm_workdir = config.setdefault('npm_workdir', os.getcwd())
     npm_command_args = config.setdefault('npm_command_args', ())
 
     command = shlex.split(npm_executable)
 
     if not npm_command_args:
-        command.extend(['install', '--prefix=' + app.NPM_ROOT_PATH])
+        command.extend(['install', '--prefix=' + app_config.NPM_ROOT_PATH])
     else:
         command.extend(npm_command_args)
 
@@ -111,12 +111,12 @@ def get_files(storage, match_patterns='*', ignore_patterns=None, location=''):
 
 class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
-        self.node_modules_path = app.NPM_ROOT_PATH
-        self.destination = getattr(settings, 'NPM_STATIC_FILES_PREFIX', '')
-        self.cache_enabled = getattr(settings, 'NPM_FINDER_USE_CACHE', True)
+        self.node_modules_path = app_config.NPM_ROOT_PATH
+        self.destination = app_config.NPM_STATIC_FILES_PREFIX
+        self.cache_enabled = app_config.NPM_FINDER_USE_CACHE
         self.cached_list = None
 
-        self.match_patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None)) or ['*']
+        self.match_patterns = flatten_patterns(app_config.NPM_FILE_PATTERNS) or ['*']
         self.locations = [(self.destination, os.path.join(self.node_modules_path, 'node_modules'))]
         self.storages = OrderedDict()
 
