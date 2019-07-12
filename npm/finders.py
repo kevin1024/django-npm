@@ -1,4 +1,5 @@
 import os
+import shlex
 import subprocess
 from fnmatch import fnmatch
 
@@ -7,6 +8,7 @@ from django.conf import settings
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
+from django.utils.six import string_types
 
 try:
     from collections import OrderedDict
@@ -17,9 +19,20 @@ app = apps.get_app_config("npm")
 
 
 def npm_install(**config):
-    npm_executable_path = config.setdefault('npm_executable_path', app.NPM_EXECUTABLE_PATH)
+    """
+    Windows settings
+    node_executable = "D:\\Program Files\\nodejs\\node.exe"
+    npm_cli = os.path.join(os.path.dirname(node_executable),
+                           "node_modules\\npm\\bin\\npm-cli.js")
+    :param config: npm_executable
+    :return:
+    """
+    npm_executable = config.setdefault('npm_executable', app.NPM_EXECUTABLE_PATH)
 
-    command = [npm_executable_path, 'install', '--prefix=' + app.NPM_ROOT_PATH]
+    if isinstance(npm_executable, string_types):
+        npm_executable = shlex.split(npm_executable)
+
+    command = npm_executable + ['install', '--prefix=' + app.NPM_ROOT_PATH]
 
     proc = subprocess.Popen(
         command,
