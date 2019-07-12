@@ -33,12 +33,14 @@ def npm_install(**config):
     """
     npm_executable = config.setdefault('npm_executable', app.NPM_EXECUTABLE_PATH)
     npm_workdir = config.setdefault('npm_workdir', os.getcwd())
-    npm_args = config.setdefault('npm_args', ())
+    npm_command_args = config.setdefault('npm_command_args', ())
 
     command = shlex.split(npm_executable)
 
-    if not npm_args:
+    if not npm_command_args:
         command.extend(['install', '--prefix=' + app.NPM_ROOT_PATH])
+    else:
+        command.extend(npm_command_args)
 
     logger.debug(str(command))
 
@@ -50,8 +52,11 @@ def npm_install(**config):
         cwd=npm_workdir,
         bufsize=2048
     )
-    for data in iter(proc.stdout.readline, ''):
-        print(data, file=sys.stdout, end='')
+    while proc.poll() is None:
+        for data in iter(proc.stdout.readline, ''):
+            print(data, file=sys.stdout, end='')
+    # npm code
+    return proc.poll()
 
 
 def flatten_patterns(patterns):
