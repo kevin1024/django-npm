@@ -25,3 +25,10 @@ class StdinWriter(threading.Thread):
 
     def close(self):
         self.proc.stdin.close()
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()

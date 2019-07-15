@@ -43,17 +43,15 @@ def npm_install(**config):
         cwd=npm_workdir,
         bufsize=2048
     )
-    writer = StdinWriter(proc)
-    writer.start()
-    try:
-        while proc.poll() is None:
-            data = proc.stdout.read(1)
-            if not data:
-                break
-            print(data, file=sys.stdout, end='')
-    finally:
-        proc.stdout.close()
-        writer.close()
+    with StdinWriter(proc):
+        try:
+            while proc.poll() is None:
+                data = proc.stdout.read(1)
+                if not data:
+                    break
+                print(data, file=sys.stdout, end='')
+        finally:
+            proc.stdout.close()
 
     logger.debug("%s %s" % (proc.poll(), command))
     # npm code
