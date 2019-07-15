@@ -3,11 +3,12 @@ from os import path
 
 here = path.abspath(path.dirname(__file__))
 
+requirements = ['django-appconf']
+
 try:
     from collections import OrderedDict
-    requirements = []
 except ImportError:
-    requirements = ['ordereddict']
+    requirements.append('ordereddict')
 
 setup(
     name='django-npm',
