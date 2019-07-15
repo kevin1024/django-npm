@@ -4,8 +4,6 @@ import os
 import shlex
 import subprocess
 import sys
-import threading
-import time
 from fnmatch import fnmatch
 from logging import getLogger
 
@@ -13,6 +11,7 @@ from django.apps import apps
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
+from npm.process import StdinWriter
 
 logger = getLogger(__name__)
 
@@ -22,28 +21,6 @@ except ImportError:
     from ordereddict import OrderedDict
 
 app_config = apps.get_app_config("npm")
-
-
-class StdinWriter(threading.Thread):
-    def __init__(self, proc):
-        threading.Thread.__init__(self)
-        self.proc = proc
-
-    def do_input(self):
-        data = sys.stdin.readline()
-        self.proc.stdin.write(data)
-        if not data.strip(os.linesep):
-            time.sleep(1)
-
-    def run(self):
-        while self.proc.poll() is None:
-            try:
-                self.do_input()
-            except (IOError, ValueError):
-                break
-
-    def close(self):
-        self.proc.stdin.close()
 
 
 def npm_install(**config):
