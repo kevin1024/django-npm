@@ -21,7 +21,7 @@ logger = getLogger(__name__)
 def npm_install(**config):
     """Install nodejs packages"""
     npm_executable = config.setdefault('npm_executable', settings.NPM_EXECUTABLE_PATH)
-    npm_workdir = config.setdefault('npm_workdir', os.getcwd())
+    npm_workdir = config.setdefault('npm_workdir', settings.NPM_ROOT_PATH)
     npm_command_args = config.setdefault('npm_command_args', ())
 
     command = shlex.split(npm_executable)
