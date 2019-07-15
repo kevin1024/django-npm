@@ -11,14 +11,11 @@ from django.apps import apps
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
+
+from npm.compat import OrderedDict
 from npm.process import StdinWriter
 
 logger = getLogger(__name__)
-
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
 
 app_config = apps.get_app_config("npm")
 
