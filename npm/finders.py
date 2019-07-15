@@ -7,29 +7,27 @@ import sys
 from fnmatch import fnmatch
 from logging import getLogger
 
-from django.apps import apps
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
 
 from npm.compat import OrderedDict
+from npm.conf import settings
 from npm.process import StdinWriter
 
 logger = getLogger(__name__)
 
-app_config = apps.get_app_config("npm")
-
 
 def npm_install(**config):
     """Install nodejs packages"""
-    npm_executable = config.setdefault('npm_executable', app_config.NPM_EXECUTABLE_PATH)
+    npm_executable = config.setdefault('npm_executable', settings.NPM_EXECUTABLE_PATH)
     npm_workdir = config.setdefault('npm_workdir', os.getcwd())
     npm_command_args = config.setdefault('npm_command_args', ())
 
     command = shlex.split(npm_executable)
 
     if not npm_command_args:
-        command.extend(['install', '--prefix=' + app_config.NPM_ROOT_PATH])
+        command.extend(['install', '--prefix=' + settings.NPM_ROOT_PATH])
     else:
         command.extend(npm_command_args)
 
@@ -110,12 +108,12 @@ def get_files(storage, match_patterns='*', ignore_patterns=None, location=''):
 
 class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
-        self.node_modules_path = app_config.NPM_ROOT_PATH
-        self.destination = app_config.NPM_STATIC_FILES_PREFIX
-        self.cache_enabled = app_config.NPM_FINDER_USE_CACHE
+        self.node_modules_path = settings.NPM_ROOT_PATH
+        self.destination = settings.NPM_STATIC_FILES_PREFIX
+        self.cache_enabled = settings.NPM_FINDER_USE_CACHE
         self.cached_list = None
 
-        self.match_patterns = flatten_patterns(app_config.NPM_FILE_PATTERNS) or ['*']
+        self.match_patterns = flatten_patterns(settings.NPM_FILE_PATTERNS) or ['*']
         self.locations = [(self.destination, os.path.join(self.node_modules_path, 'node_modules'))]
         self.storages = OrderedDict()
 
