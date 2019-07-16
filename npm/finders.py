@@ -137,6 +137,8 @@ class NpmFinder(FileSystemFinder):
 
     def _make_list_generator(self, ignore_patterns=None):
         for prefix, root in self.locations:
+            if not os.path.exists(root):
+                continue
             storage = self.storages[root]
             for path in get_files(storage, self.match_patterns, ignore_patterns):
                 yield path, storage
