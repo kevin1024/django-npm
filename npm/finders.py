@@ -60,7 +60,7 @@ def flatten_patterns(patterns):
     if patterns is None:
         return None
     return [
-        os.path.join(module, module_pattern)
+        os.path.normpath(os.path.join(module, module_pattern))
         for module, module_patterns in patterns.items()
         for module_pattern in module_patterns
     ]
