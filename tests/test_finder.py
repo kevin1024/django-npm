@@ -50,12 +50,12 @@ def test_get_files_with_patterns(storage):
     files_all = list(get_files(storage, match_patterns=['**/*.js', '**/*.css']))
     assert len(files_all)
     assert all(path for path in files_all)
-    assert all(path.suffix in ('.js', '.css') for path in files_all)
+    assert all(Path(path).suffix in ('.js', '.css') for path in files_all)
 
     files = list(get_files(storage, match_patterns=['*/*.js', '*/*.css']))
     assert len(files)
     assert all(path for path in files)
-    assert all(path.suffix in ('.js', '.css') for path in files_all)
+    assert all(Path(path).suffix in ('.js', '.css') for path in files_all)
 
     assert files != files_all
 

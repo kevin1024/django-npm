@@ -51,12 +51,15 @@ def get_files(storage, match_patterns=None, ignore_patterns=None):
     ignore_paths = []
     if ignore_patterns:
         for ignore_pattern in ignore_patterns:
-            ignore_paths.append(list(root.glob(ignore_pattern)))
+            for ignore_path in root.glob(ignore_pattern):
+                ignore_paths.append(ignore_path.relative_to(root))
     for match_pattern in match_patterns:
         # let Path.glob do all the work
         for path in root.glob(match_pattern):
-            if path not in ignore_paths:
-                yield path
+            if path.is_file():
+                path = path.relative_to(root)
+                if path not in ignore_paths:
+                    yield path
 
 
 class NpmFinder(FileSystemFinder):
