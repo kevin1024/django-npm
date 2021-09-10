@@ -4,3 +4,6 @@
 build/
 dist/
 .cache
+.venv
+.pyest_cache
+node_modules
