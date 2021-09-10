@@ -1,36 +1,30 @@
-# -*- coding: utf-8 -*-
 import os
 import subprocess
-from pathlib import Path
+from fnmatch import fnmatch
 
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 
-
-def setting(setting_name, default=None):
-    return getattr(settings, setting_name, default)
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 
 
 def npm_install():
-    npm = setting('NPM_EXECUTABLE_PATH')
-    yarn = setting('YARN_EXECUTABLE_PATH')
-
-    prefix = '--prefix'
-    if yarn:
-        npm = yarn
-        prefix = '--cwd'
-    elif npm is None:
-        npm = 'npm'
-
-    command = [npm, 'install', prefix, get_npm_root_path()]
-    proc = subprocess.Popen(command, env={'PATH': os.environ.get('PATH')},)
-    return proc.wait()
+    npm_executable_path = getattr(settings, 'NPM_EXECUTABLE_PATH', 'npm')
+    command = [npm_executable_path, 'install', '--prefix=' + get_npm_root_path()]
+    proc = subprocess.Popen(
+        command,
+        env={'PATH': os.environ.get('PATH')},
+    )
+    proc.wait()
 
 
 def get_npm_root_path():
-    return setting('NPM_ROOT_PATH', '.')
+    return getattr(settings, 'NPM_ROOT_PATH', '.')
 
 
 def flatten_patterns(patterns):
@@ -43,38 +37,61 @@ def flatten_patterns(patterns):
     ]
 
 
-def get_files(storage, match_patterns=None, ignore_patterns=None):
-    if match_patterns is None:
-        match_patterns = ['*']
+def fnmatch_sub(directory, pattern):
+    """
+    Match a directory against a potentially longer pattern containing
+    wildcards in the path components. fnmatch does the globbing, but there
+    appears to be no built-in way to match only the beginning of a pattern.
+    """
+    length = len(directory.split(os.sep))
+    components = pattern.split(os.sep)[:length]
+    return fnmatch(directory, os.sep.join(components))
 
-    root = Path(storage.base_location).resolve()
-    ignore_paths = []
-    if ignore_patterns:
-        for ignore_pattern in ignore_patterns:
-            ignore_paths.append(list(root.glob(ignore_pattern)))
-    for match_pattern in match_patterns:
-        # let Path.glob do all the work
-        for path in root.glob(match_pattern):
-            if path not in ignore_paths:
-                yield path
+
+def may_contain_match(directory, patterns):
+    return any(fnmatch_sub(directory, pattern) for pattern in patterns)
+
+
+def get_files(storage, match_patterns='*', ignore_patterns=None, location=''):
+    if ignore_patterns is None:
+        ignore_patterns = []
+    if match_patterns is None:
+        match_patterns = []
+
+    directories, files = storage.listdir(location)
+    for fn in files:
+        if django_utils.matches_patterns(fn, ignore_patterns):
+            continue
+        if location:
+            fn = os.path.join(location, fn)
+        if not django_utils.matches_patterns(fn, match_patterns):
+            continue
+        yield fn
+    for dir in directories:
+        if django_utils.matches_patterns(dir, ignore_patterns):
+            continue
+        if location:
+            dir = os.path.join(location, dir)
+        if may_contain_match(dir, match_patterns) or django_utils.matches_patterns(dir, match_patterns):
+            for fn in get_files(storage, match_patterns, ignore_patterns, dir):
+                yield fn
 
 
 class NpmFinder(FileSystemFinder):
-    # noinspection PyMissingConstructor,PyUnusedLocal
-    def __init__(self, *args, **kwargs):
+    def __init__(self, apps=None, *args, **kwargs):
         self.node_modules_path = get_npm_root_path()
-        self.destination = setting('NPM_STATIC_FILES_PREFIX', '')
-        self.cache_enabled = setting('NPM_FINDER_USE_CACHE', True)
+        self.destination = getattr(settings, 'NPM_STATIC_FILES_PREFIX', '')
+        self.cache_enabled = getattr(settings, 'NPM_FINDER_USE_CACHE', True)
+        self.cached_list = None
 
-        self.match_patterns = flatten_patterns(setting('NPM_FILE_PATTERNS', None)) or ['*']
+        self.match_patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None)) or ['*']
         self.locations = [(self.destination, os.path.join(self.node_modules_path, 'node_modules'))]
+        self.storages = OrderedDict()
 
         filesystem_storage = FileSystemStorage(location=self.locations[0][1])
         filesystem_storage.prefix = self.locations[0][0]
-        self.storages = {self.locations[0][1]: filesystem_storage}
-        self.cached_list = None
+        self.storages[self.locations[0][1]] = filesystem_storage
 
-    # noinspection PyShadowingBuiltins
     def find(self, path, all=False):
         relpath = os.path.relpath(path, self.destination)
         if not django_utils.matches_patterns(relpath, self.match_patterns):

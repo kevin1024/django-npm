@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+from django.conf import settings
+
 
 def configure_settings():
-    from django.conf import settings
     settings.configure(
         DEBUG=True,
         CACHES={
