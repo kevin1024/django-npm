@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "django-npm"
+version = "1.1.0"
+description='A django staticfiles finder that supporting npm'
+authors = [
+    "David Nugent <davidn@uniquode.io>",
+    "Kevin McCarthy <me@kevinmccarthy.org>"
+]
+repository='https://github.com/Uniquode/django-npm'
+license='MIT'
+classifiers=[
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+keywords=[
+    "django",
+    "npm",
+    "staticfiles",
+]
+packages=[
+    { include = "npm" },
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+Django = "^3.2.7"
+pytest = "^6.2.5"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
