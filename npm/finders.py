@@ -1,37 +1,66 @@
+from __future__ import print_function
+
 import os
+import shlex
 import subprocess
+import sys
 from fnmatch import fnmatch
+from logging import getLogger
 
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
-from django.conf import settings
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ordereddict import OrderedDict
+from npm.compat import OrderedDict
+from npm.conf import settings
+from npm.process import StdinWriter
+
+logger = getLogger(__name__)
 
 
-def npm_install():
-    npm_executable_path = getattr(settings, 'NPM_EXECUTABLE_PATH', 'npm')
-    command = [npm_executable_path, 'install', '--prefix=' + get_npm_root_path()]
+def npm_install(**config):
+    """Install nodejs packages"""
+    npm_executable = config.setdefault('npm_executable', settings.NPM_EXECUTABLE_PATH)
+    npm_workdir = config.setdefault('npm_workdir', settings.NPM_ROOT_PATH)
+    npm_command_args = config.setdefault('npm_command_args', ())
+
+    command = shlex.split(npm_executable)
+
+    if not npm_command_args:
+        command.extend(['install', '--prefix=' + settings.NPM_ROOT_PATH])
+    else:
+        command.extend(npm_command_args)
+
     proc = subprocess.Popen(
         command,
-        env={'PATH': os.environ.get('PATH')},
+        env=os.environ,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        stdin=subprocess.PIPE,
+        universal_newlines=True,
+        cwd=npm_workdir,
+        bufsize=2048
     )
-    proc.wait()
+    with StdinWriter(proc):
+        try:
+            while proc.poll() is None:
+                data = proc.stdout.read(1)
+                if not data:
+                    break
+                print(data, file=sys.stdout, end='')
+        finally:
+            proc.stdout.close()
 
-
-def get_npm_root_path():
-    return getattr(settings, 'NPM_ROOT_PATH', '.')
+    logger.debug("%s %s" % (proc.poll(), command))
+    # npm code
+    return proc.poll()
 
 
 def flatten_patterns(patterns):
     if patterns is None:
         return None
     return [
-        os.path.join(module, module_pattern)
+        os.path.normpath(os.path.join(module, module_pattern))
         for module, module_patterns in patterns.items()
         for module_pattern in module_patterns
     ]
@@ -79,12 +108,12 @@ def get_files(storage, match_patterns='*', ignore_patterns=None, location=''):
 
 class NpmFinder(FileSystemFinder):
     def __init__(self, apps=None, *args, **kwargs):
-        self.node_modules_path = get_npm_root_path()
-        self.destination = getattr(settings, 'NPM_STATIC_FILES_PREFIX', '')
-        self.cache_enabled = getattr(settings, 'NPM_FINDER_USE_CACHE', True)
+        self.node_modules_path = settings.NPM_ROOT_PATH
+        self.destination = settings.NPM_STATIC_FILES_PREFIX
+        self.cache_enabled = settings.NPM_FINDER_USE_CACHE
         self.cached_list = None
 
-        self.match_patterns = flatten_patterns(getattr(settings, 'NPM_FILE_PATTERNS', None)) or ['*']
+        self.match_patterns = flatten_patterns(settings.NPM_FILE_PATTERNS) or ['*']
         self.locations = [(self.destination, os.path.join(self.node_modules_path, 'node_modules'))]
         self.storages = OrderedDict()
 
@@ -108,6 +137,8 @@ class NpmFinder(FileSystemFinder):
 
     def _make_list_generator(self, ignore_patterns=None):
         for prefix, root in self.locations:
+            if not os.path.exists(root):
+                continue
             storage = self.storages[root]
             for path in get_files(storage, self.match_patterns, ignore_patterns):
                 yield path, storage

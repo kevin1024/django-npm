@@ -3,11 +3,12 @@ from os import path
 
 here = path.abspath(path.dirname(__file__))
 
+requirements = ['django-appconf']
+
 try:
     from collections import OrderedDict
-    requirements = []
 except ImportError:
-    requirements = ['ordereddict']
+    requirements.append('ordereddict')
 
 setup(
     name='django-npm',
@@ -29,6 +30,7 @@ setup(
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.9'
     ],
 
     keywords='django npm staticfiles',
