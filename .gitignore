@@ -1,9 +1,12 @@
 *.pyc
 *.sw?
 *.egg-info/
+.idea/
+.vscode/
 build/
 dist/
 .cache
 .venv
+venv
 .pyest_cache
 node_modules

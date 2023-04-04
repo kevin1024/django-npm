@@ -1,3 +1,3 @@
 Run tests with
 
-`$ py.test`
+`$ pytest`

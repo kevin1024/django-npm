@@ -16,15 +16,20 @@ def setting(setting_name, default=None):
 def npm_install():
     npm = setting('NPM_EXECUTABLE_PATH')
     yarn = setting('YARN_EXECUTABLE_PATH')
+    pnpm = setting('PNPM_EXECUTABLE_PATH')
 
     prefix = '--prefix'
-    if yarn:
-        npm = yarn
+    if pnpm:
+        npm = pnpm or "pnpm"
+        prefix = '--dir'
+    elif yarn:
+        npm = yarn or "yarn"
         prefix = '--cwd'
     elif npm is None:
-        npm = 'npm'
+        npm = npm or 'npm'
 
-    command = [npm, 'install', prefix, get_npm_root_path()]
+    command = [str(npm), 'install', prefix, str(get_npm_root_path())]
+    print(" ".join(command))
     proc = subprocess.Popen(command, env={'PATH': os.environ.get('PATH')},)
     return proc.wait()
 
