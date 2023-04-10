@@ -37,11 +37,14 @@ This is only required at deployment, and if using Django runserver for developme
  * `NPM_FILE_PATTERNS`: (optional) By default, django-npm will expose all files in `node_modules` to Django as staticfiles.  You may not want *all* of them to be exposed.  You can pick specific files by adding some additional configuration:
     ```python
     NPM_FILE_PATTERNS = {
-        'react': ['react.js'],
+        'react': ['dist/react.js'],
         'express': ['lib/*.js', 'index.js']
     }
     ```
     Keys are the names of the npm modules, and values are lists containing strings.  The strings match against glob patterns.
+    Use '**' to include all subdirectories.
+
+ * `NPM_IGNORE_PATTERNS`: (optional) This is a list of patterns to exclude. By default, only files starting with a period '`.`' are excluded.
 
  * `NPM_FINDER_USE_CACHE`: (default True) A boolean that enables cache in the finder. If enabled, the file list will be computed only once, when the server is started.
 
