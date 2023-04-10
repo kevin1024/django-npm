@@ -1,33 +1,37 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
 from tempfile import TemporaryDirectory
-
-from .util import configure_settings
-configure_settings()
-
 import pytest
 
 from django.core.files.storage import FileSystemStorage
 from django.test.utils import override_settings
 
 from npm.finders import get_files, NpmFinder, npm_install
+from .util import configure_settings
+
+configure_settings()
+
+
+# set to npm, pnpm or yarn as desired
+# note: pnpm does much better local caching
+NPM_EXE = "pnpm"
 
 
 @pytest.fixture(scope='session')
 def setup_npm_dir():
     # don't use py.tmpdir as it is scope='function'
-    with TemporaryDirectory() as tmppath:
-        tmpdir = Path(tmppath).resolve(strict=True)
-        package_json = tmpdir / 'package.json'
+    with TemporaryDirectory() as tmp_path:
+        tmp_dir = Path(tmp_path).resolve(strict=True)
+        package_json = tmp_dir / 'package.json'
         package_json.write_text('''{
     "name": "test",
     "dependencies": {
         "mocha": "*"
     }
 }''')
-        with override_settings(PNPM_EXECUTABLE_PATH="pnpm", NPM_ROOT_PATH=str(tmpdir)):
+        with override_settings(NPM_EXECUTABLE_PATH=NPM_EXE, NPM_ROOT_PATH=str(tmp_dir)):
             npm_install()
-            yield tmpdir
+            yield tmp_dir
 
 
 @pytest.fixture(scope='function')
@@ -64,6 +68,7 @@ def test_get_files_with_patterns(storage):
 
 def test_finder_list_all(npm_dir):
     f = NpmFinder()
+    # using defaults
     results = list(f.list())
     assert len(results)
     assert all(isinstance(result, tuple) for result in results)
@@ -74,6 +79,7 @@ def test_finder_list_all(npm_dir):
 def test_finder_list_in_module(npm_dir):
     with override_settings(NPM_FILE_PATTERNS={'mocha': ['**/*']}):
         f = NpmFinder()
+        # using specific patterns
         results = list(f.list())
         assert len(results)
         assert all(isinstance(result, tuple) for result in results)
@@ -82,7 +88,7 @@ def test_finder_list_in_module(npm_dir):
 
 
 def test_finder_list_files_in_module(npm_dir):
-    with override_settings(NPM_FILE_PATTERNS={'mocha': ['**/*.js','**/*.css',]}):
+    with override_settings(NPM_FILE_PATTERNS={'mocha': ['**/*.js', '**/*.css', ]}):
         f = NpmFinder()
         results = list(f.list())
         assert len(results)

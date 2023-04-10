@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 import subprocess
-from pathlib import Path
 import fnmatch
 from functools import cache, lru_cache
+from pathlib import Path
 
 from django.contrib.staticfiles import utils as django_utils
 from django.contrib.staticfiles.finders import FileSystemFinder
@@ -16,19 +16,14 @@ def setting(setting_name, default=None):
 
 
 def npm_install():
-    npm = setting('NPM_EXECUTABLE_PATH')
-    yarn = setting('YARN_EXECUTABLE_PATH')
-    pnpm = setting('PNPM_EXECUTABLE_PATH')
+    npm = setting('NPM_EXECUTABLE_PATH') or \
+          setting('YARN_EXECUTABLE_PATH') or \
+          setting('PNPM_EXECUTABLE_PATH') or \
+          "npm"
 
-    prefix = '--prefix'
-    if pnpm:
-        npm = pnpm or "pnpm"
-        prefix = '--dir'
-    elif yarn:
-        npm = yarn or "yarn"
-        prefix = '--cwd'
-    elif npm is None:
-        npm = npm or 'npm'
+    prefix = '--dir' if npm.endswith("pnpm") else \
+             '--cwd' if npm.endswith("yarn") else \
+             '--prefix'
 
     command = [str(npm), 'install', prefix, str(get_npm_root_path())]
     print(" ".join(command))
