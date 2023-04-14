@@ -29,8 +29,7 @@ This is only required at deployment, and if using Django runserver for developme
  * `NPM_ROOT_PATH`: *absolute* path to the npm  "root" directory - this is where npm will look for your `package.json`, put your `node_modules` folder and look for a `.npmrc` file
 
  * `NPM_EXECUTABLE_PATH`: (optional, default manager) sets `npm` as modules manager and optinoally overrides its location.
-   + OR `YARN_EXECUTABLE_PATH`: sets `yarn` as modules manager and optionally overrides its location. Setting this also changes the command line slighty to ensure the correct root path is used.
-   + OR `PNPM_EXECUTABLE_PATH`: sets `pnpm` as modules manager and optionally overrides its location. Setting this also changes the command line slighty to ensure the correct root path is used.
+   Supported NPM managers are: npm, yarn and pnpm. If the executable is on the $PATH, the value does not need to contain a full/absolute path.
 
  * `NPM_STATIC_FILES_PREFIX`: (optional) Your npm files will end up under this path inside static.  I usually use something like ` os.path.join('js', 'lib')` (so your files will be in /static/js/lib/react.js for example) but you can leave it blank and they will just end up in the root.
  
