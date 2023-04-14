@@ -14,7 +14,7 @@ configure_settings()
 
 # set to npm, pnpm or yarn as desired
 # note: pnpm does much better local caching
-NPM_EXE = "pnpm"
+NPM_EXE = "npm"
 
 
 @pytest.fixture(scope='session')
