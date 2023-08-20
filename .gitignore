@@ -5,8 +5,7 @@
 .vscode/
 build/
 dist/
-.cache
+.*_cache
 .venv
 venv
-.pyest_cache
 node_modules
