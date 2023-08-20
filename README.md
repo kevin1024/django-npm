@@ -58,13 +58,3 @@ If you want to run `npm install` programmatically, you can do:
 from npm.finders import npm_install
 npm_install()
 ```
-
-## Changelog
-
-* v1.0.0 - Improve speed, separate `npm install` from the finder
-* v0.1.4 - Fix bug with `NPM_EXECUTABLE_PATH` (thanks @yohanboniface)
-* v0.1.3 - Actually fix destination bug
-* v0.1.2 - Fix bug with destination prefix
-* v0.1.1 - manage.py runserver bugfix
-* v0.1.0 - Add `NPM_FILE_PATTERNS` setting
-* v0.0.1 - initial release
