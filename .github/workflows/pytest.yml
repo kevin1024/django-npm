@@ -33,7 +33,7 @@ jobs:
 
       - name: Run the tests
         run: |
-          pytest
+          poetry run pytest
 
       - name: Build
         run: poetry build
