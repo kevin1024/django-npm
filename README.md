@@ -6,8 +6,8 @@ Want to use npm modules in your django project without vendoring them? django-np
 
 1. `$ pip install django-npm`
 
-3. Install npm, yarn or pnpm. 
-If you use a private registry, make sure your `.npmrc` or equivalent is 
+3. Install npm, yarn or pnpm.
+If you use a private registry, make sure your `.npmrc` or equivalent is
 set up to connect to it
 
 4. Have a `package.json` at the root of your project, listing your dependencies
@@ -32,8 +32,8 @@ This is only required at deployment, and if using Django runserver for developme
    Supported NPM managers are: npm, yarn and pnpm. If the executable is on the $PATH, the value does not need to contain a full/absolute path.
 
  * `NPM_STATIC_FILES_PREFIX`: (optional) Your npm files will end up under this path inside static.  I usually use something like ` os.path.join('js', 'lib')` (so your files will be in /static/js/lib/react.js for example) but you can leave it blank and they will just end up in the root.
- 
-* `NPM_FILE_PATTERNS`: (optional) By default, django-npm will expose all files in `node_modules` to Django as staticfiles.  You may not want *all* of them to be exposed.  You can pick specific files by adding some additional configuration:
+
+ * `NPM_FILE_PATTERNS`: (optional) By default, django-npm will expose all files in `node_modules` to Django as staticfiles.  You may not want *all* of them to be exposed.  You can pick specific files by adding some additional configuration:
 ```python
 NPM_FILE_PATTERNS = {
    'react': ['dist/react.js'],

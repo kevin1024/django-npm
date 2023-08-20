@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
+import fnmatch
 import os
 import subprocess
-import fnmatch
 from functools import cache, lru_cache
 from pathlib import Path
 
+from django.conf import settings
 from django.contrib.staticfiles.finders import FileSystemFinder
 from django.core.files.storage import FileSystemStorage
-from django.conf import settings
 
-NPM_EXECUTABLE_PATH = 'NPM_EXECUTABLE_PATH'
-NPM_ROOT_PATH = 'NPM_ROOT_PATH'
-NPM_STATIC_FILES_PREFIX = 'NPM_STATIC_FILES_PREFIX'
-NPM_FILE_PATTERNS = 'NPM_FILE_PATTERNS'
-NPM_IGNORE_PATTERNS = 'NPM_IGNORE_PATTERNS'
-NPM_FINDER_USE_CACHE = 'NPM_FINDER_USE_CACHE'
+NPM_EXECUTABLE_PATH = "NPM_EXECUTABLE_PATH"
+NPM_ROOT_PATH = "NPM_ROOT_PATH"
+NPM_STATIC_FILES_PREFIX = "NPM_STATIC_FILES_PREFIX"
+NPM_FILE_PATTERNS = "NPM_FILE_PATTERNS"
+NPM_IGNORE_PATTERNS = "NPM_IGNORE_PATTERNS"
+NPM_FINDER_USE_CACHE = "NPM_FINDER_USE_CACHE"
+
 
 def setting(setting_name, default=None):
     return getattr(settings, setting_name, default)
@@ -23,19 +24,20 @@ def setting(setting_name, default=None):
 def npm_install():
     npm = setting(NPM_EXECUTABLE_PATH) or "npm"
 
-    prefix = '--dir' if npm.endswith("pnpm") else \
-             '--cwd' if npm.endswith("yarn") else \
-             '--prefix'
+    prefix = "--dir" if npm.endswith("pnpm") else "--cwd" if npm.endswith("yarn") else "--prefix"
 
-    command = [str(npm), 'install', prefix, str(get_npm_root_path())]
+    command = [str(npm), "install", prefix, str(get_npm_root_path())]
     print(" ".join(command))
-    proc = subprocess.Popen(command, env={'PATH': os.environ.get('PATH')}, )
+    proc = subprocess.Popen(
+        command,
+        env={"PATH": os.environ.get("PATH")},
+    )
     return proc.wait()
 
 
 @cache
 def get_npm_root_path():
-    return setting(NPM_ROOT_PATH, '.')
+    return setting(NPM_ROOT_PATH, ".")
 
 
 def flatten_patterns(patterns):
@@ -48,24 +50,23 @@ def flatten_patterns(patterns):
     ]
 
 
-def get_files(storage, match_patterns=None, ignore_patterns=None, find_pattern: str|None = None):
+def get_files(storage, match_patterns=None, ignore_patterns=None, find_pattern: str | None = None):
     if match_patterns is None:
-        match_patterns = ['*']
+        match_patterns = ["*"]
     elif not isinstance(match_patterns, (list, tuple)):
         match_patterns = [match_patterns]
 
     root = Path(storage.base_location).resolve()
-    ignored_dirs, ignored_files = [], []
 
     if not ignore_patterns:
-        ignore_patterns = ['.*']
+        ignore_patterns = [".*"]
 
-    def splitpath(path: str|Path):
+    def splitpath(path: str | Path):
         if path is not None:
             path = str(path)
             p = path.rsplit(os.sep, maxsplit=1)
-            return p if len(p) == 2 else (p[0], '*') if path.endswith(os.sep) else ('', p[0])
-        return '', ''
+            return p if len(p) == 2 else (p[0], "*") if path.endswith(os.sep) else ("", p[0])
+        return "", ""
 
     findpath, findname = splitpath(find_pattern)
 
@@ -113,11 +114,11 @@ class NpmFinder(FileSystemFinder):
     # noinspection PyMissingConstructor,PyUnusedLocal
     def __init__(self, *args, **kwargs):
         self.node_modules_path = get_npm_root_path()
-        self.destination = setting(NPM_STATIC_FILES_PREFIX, '')
+        self.destination = setting(NPM_STATIC_FILES_PREFIX, "")
         self.cache_enabled = setting(NPM_FINDER_USE_CACHE, True)
-        self.ignore_patterns = setting(NPM_IGNORE_PATTERNS, None) or ['.*']
-        self.match_patterns = flatten_patterns(setting(NPM_FILE_PATTERNS, None)) or ['*']
-        self.locations = [(self.destination, os.path.join(self.node_modules_path, 'node_modules'))]
+        self.ignore_patterns = setting(NPM_IGNORE_PATTERNS, None) or [".*"]
+        self.match_patterns = flatten_patterns(setting(NPM_FILE_PATTERNS, None)) or ["*"]
+        self.locations = [(self.destination, os.path.join(self.node_modules_path, "node_modules"))]
 
         filesystem_storage = FileSystemStorage(location=self.locations[0][1])
         filesystem_storage.prefix = self.locations[0][0]
