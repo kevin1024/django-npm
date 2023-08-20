@@ -1,4 +1,4 @@
-# django-npm [![Build Status](https://travis-ci.org/kevin1024/django-npm.svg?branch=master)](https://travis-ci.org/kevin1024/django-npm)
+[//]: # (# django-npm [![Build Status]&#40;https://travis-ci.org/kevin1024/django-npm.svg?branch=master&#41;]&#40;https://travis-ci.org/kevin1024/django-npm&#41;)
 
 Want to use npm modules in your django project without vendoring them? django-npm serves as a wrapper around the npm command-line program as well as a staticfiles finder.
 
@@ -33,15 +33,15 @@ This is only required at deployment, and if using Django runserver for developme
 
  * `NPM_STATIC_FILES_PREFIX`: (optional) Your npm files will end up under this path inside static.  I usually use something like ` os.path.join('js', 'lib')` (so your files will be in /static/js/lib/react.js for example) but you can leave it blank and they will just end up in the root.
  
- * `NPM_FILE_PATTERNS`: (optional) By default, django-npm will expose all files in `node_modules` to Django as staticfiles.  You may not want *all* of them to be exposed.  You can pick specific files by adding some additional configuration:
-    ```python
-    NPM_FILE_PATTERNS = {
-        'react': ['dist/react.js'],
-        'express': ['lib/*.js', 'index.js']
-    }
-    ```
-    Keys are the names of the npm modules, and values are lists containing strings.  The strings match against glob patterns.
-    Use '**' to include all subdirectories.
+* `NPM_FILE_PATTERNS`: (optional) By default, django-npm will expose all files in `node_modules` to Django as staticfiles.  You may not want *all* of them to be exposed.  You can pick specific files by adding some additional configuration:
+```python
+NPM_FILE_PATTERNS = {
+   'react': ['dist/react.js'],
+   'express': ['lib/*.js', 'index.js']
+}
+```
+   Keys are the names of the npm modules, and values are lists containing strings.  The strings match against glob patterns.
+   Use '**' to include all subdirectories.
 
  * `NPM_IGNORE_PATTERNS`: (optional) This is a list of patterns to exclude. By default, only files starting with a period '`.`' are excluded.
 

@@ -1,25 +1,25 @@
-[build-system]
-requires = [
-    "setuptools >= 65",
-    "wheel >= 0.38",
-]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "django-npm"
-version = "1.2.0"
+version = "1.3.0"
 description = 'A django staticfiles finder that supporting npm/yarn/pnpm'
-license = {text = "MIT"}
 authors = [
-    { name = "David Nugent", email = "davidn@uniquode.io" },
-    { name = "Kevin McCarthy", email = "e@kevinmccarthy.org" },
+    "David Nugent <davidn@uniquode.io>",
+    "Kevin McCarthy <e@kevinmccarthy.org>",
 ]
-urls = { home-page = "https://github.com/Uniquode/django-npm" }
-classifiers=[
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/Uniquode/django-npm"
+repository = "https://github.com/Uniquode/django-npm"
+documentation = "https://github.com/Uniquode/django-npm"
+packages = [
+    { include = "npm" }
+]
+classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Build Tools",
     "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -29,13 +29,20 @@ keywords=[
     "npm",
     "staticfiles",
 ]
-requires-python = ">= 3.9"
 
-dependencies = [
-    "Django >= 3.2",
-]
+[tool.poetry.dependencies]
+python = ">=3.8,<4.0"
+Django = ">=3.2,<5.0"
 
-[project.optional-dependencies]
-test = [
-    "pytest >= 6.2"
-]
+[tool.poetry.dev-dependencies]
+black = "^23.7.0"
+ruff = "^0.0.285"
+isort = "^5.12.0"
+pre-commit = "^3.3.3"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
