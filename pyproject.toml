@@ -30,7 +30,7 @@ keywords=[
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-Django = ">=3.2,<5.0"
+Django = ">=3.2"
 
 [tool.poetry.dev-dependencies]
 black = "^23.7.0"
