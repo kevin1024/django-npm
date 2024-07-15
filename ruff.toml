@@ -1,0 +1,34 @@
+extend = "./pyproject.toml"
+extend-exclude = [".venv", ".idea", ".vscode", ".*_cache"]
+line-length = 90
+indent-width = 4
+fix = true
+output-format = "full"
+
+# Assume Python 3.10
+target-version = "py310"
+
+[lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F", "Q"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[format]
+# Black compatible
+quote-style = "double"
+# Always indent with spaces
+indent-style = "space"
+# Respect magic trailing commas.
+skip-magic-trailing-comma = false
+line-ending = "lf"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"

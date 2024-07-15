@@ -24,7 +24,13 @@ def setting(setting_name, default=None):
 def npm_install():
     npm = setting(NPM_EXECUTABLE_PATH) or "npm"
 
-    prefix = "--dir" if npm.endswith("pnpm") else "--cwd" if npm.endswith("yarn") else "--prefix"
+    prefix = (
+        "--dir"
+        if npm.endswith("pnpm")
+        else "--cwd"
+        if npm.endswith("yarn")
+        else "--prefix"
+    )
 
     command = [str(npm), "install", prefix, str(get_npm_root_path())]
     print(" ".join(command))
@@ -50,7 +56,9 @@ def flatten_patterns(patterns):
     ]
 
 
-def get_files(storage, match_patterns=None, ignore_patterns=None, find_pattern: str | None = None):
+def get_files(
+    storage, match_patterns=None, ignore_patterns=None, find_pattern: str | None = None
+):
     if match_patterns is None:
         match_patterns = ["*"]
     elif not isinstance(match_patterns, (list, tuple)):
@@ -65,7 +73,9 @@ def get_files(storage, match_patterns=None, ignore_patterns=None, find_pattern: 
         if path is not None:
             path = str(path)
             p = path.rsplit(os.sep, maxsplit=1)
-            return p if len(p) == 2 else (p[0], "*") if path.endswith(os.sep) else ("", p[0])
+            return (
+                p if len(p) == 2 else (p[0], "*") if path.endswith(os.sep) else ("", p[0])
+            )
         return "", ""
 
     findpath, findname = splitpath(find_pattern)
@@ -77,7 +87,8 @@ def get_files(storage, match_patterns=None, ignore_patterns=None, find_pattern: 
     def ignored(relpath: Path):
         reldir, relname = splitpath(relpath)
         return any(
-            fnmatch.fnmatch(relname, ignorefile) and (not ignorepath or fnmatch.fnmatch(reldir, ignorepath))
+            fnmatch.fnmatch(relname, ignorefile)
+            and (not ignorepath or fnmatch.fnmatch(reldir, ignorepath))
             for (ignorepath, ignorefile) in ignorelist()
         )
 
@@ -118,7 +129,9 @@ class NpmFinder(FileSystemFinder):
         self.cache_enabled = setting(NPM_FINDER_USE_CACHE, True)
         self.ignore_patterns = setting(NPM_IGNORE_PATTERNS, None) or [".*"]
         self.match_patterns = flatten_patterns(setting(NPM_FILE_PATTERNS, None)) or ["*"]
-        self.locations = [(self.destination, os.path.join(self.node_modules_path, "node_modules"))]
+        self.locations = [
+            (self.destination, os.path.join(self.node_modules_path, "node_modules"))
+        ]
 
         filesystem_storage = FileSystemStorage(location=self.locations[0][1])
         filesystem_storage.prefix = self.locations[0][0]
@@ -130,7 +143,9 @@ class NpmFinder(FileSystemFinder):
         relpath = os.path.relpath(path, self.destination)
         for prefix, root in self.locations:
             storage = self.storages[root]
-            for p in get_files(storage, self.match_patterns, self.ignore_patterns, relpath):
+            for p in get_files(
+                storage, self.match_patterns, self.ignore_patterns, relpath
+            ):
                 return root / p
         return []
 

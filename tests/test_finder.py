@@ -114,21 +114,27 @@ def test_finder_find(npm_dir):
 
 
 def test_finder_in_subdirectory(npm_dir):
-    with override_settings(NPM_STATIC_FILES_PREFIX="lib", NPM_FILE_PATTERNS={"mocha": ["*"]}):
+    with override_settings(
+        NPM_STATIC_FILES_PREFIX="lib", NPM_FILE_PATTERNS={"mocha": ["*"]}
+    ):
         f = NpmFinder()
         file = f.find("lib/mocha/index.js")
         assert file
 
 
 def test_finder_with_patterns_in_subdirectory(npm_dir):
-    with override_settings(NPM_STATIC_FILES_PREFIX="lib", NPM_FILE_PATTERNS={"mocha": ["*"]}):
+    with override_settings(
+        NPM_STATIC_FILES_PREFIX="lib", NPM_FILE_PATTERNS={"mocha": ["*"]}
+    ):
         f = NpmFinder()
         file = f.find("lib/mocha/index.js")
         assert file
 
 
 def test_finder_with_patterns_in_directory_component(npm_dir):
-    with override_settings(NPM_STATIC_FILES_PREFIX="lib", NPM_FILE_PATTERNS={"mocha": ["*.js"]}):
+    with override_settings(
+        NPM_STATIC_FILES_PREFIX="lib", NPM_FILE_PATTERNS={"mocha": ["*.js"]}
+    ):
         f = NpmFinder()
         file = f.find("lib/mocha/lib/test.js")
         assert file
