@@ -38,7 +38,7 @@ npm_install()
 ```
 
 ## Changelog
-
+* v1.0.1 - Add support for Django 5.1 (thanks @SimonTagne)
 * v1.0.0 - Improve speed, separate `npm install` from the finder
 * v0.1.4 - Fix bug with `NPM_EXECUTABLE_PATH` (thanks @yohanboniface)
 * v0.1.3 - Actually fix destination bug
