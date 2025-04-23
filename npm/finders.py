@@ -92,11 +92,11 @@ class NpmFinder(FileSystemFinder):
         filesystem_storage.prefix = self.locations[0][0]
         self.storages[self.locations[0][1]] = filesystem_storage
 
-    def find(self, path, all=False):
+    def find(self, path, **kwargs): # TODO switch to `find_all=False` when Django<5.2 is dropped
         relpath = os.path.relpath(path, self.destination)
         if not django_utils.matches_patterns(relpath, self.match_patterns):
             return []
-        return super(NpmFinder, self).find(path, all=all)
+        return super(NpmFinder, self).find(path, **kwargs)
 
     def list(self, ignore_patterns=None):  # TODO should be configurable, add setting
         """List all files in all locations."""
